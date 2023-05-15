@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"github.com/pressly/goose/v3"
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"net"
@@ -16,6 +17,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -58,8 +60,32 @@ func (a *App) Run() {
 	if err != nil {
 		a.logger.Fatal(err)
 	}
+	// Запуск миграций
+	err = runMigrations(a.db)
+	if err != nil {
+		a.logger.Fatal(err)
+	}
 
 	a.startHTTP()
+}
+
+// runMigrations ToDo panic: goose: duplicate version 1 detected: Users/konstantin/dev/pets/GDOservice/migrations/00001_init.up.sql
+// /Users/konstantin/dev/pets/GDOservice/migrations/00001_init.down.sql
+func runMigrations(db *sql.DB) error {
+	// Укажите вашу конфигурацию миграций (путь к миграциям и источник данных)
+	goose.SetDialect("postgres") // Замените на вашу используемую базу данных
+	goose.SetTableName("goose_migrations")
+	// Получение пути к текущему файлу
+	_, filename, _, _ := runtime.Caller(0)
+	migrationsDir := filepath.Join(filepath.Dir(filename), "../../../migrations") // Замените на путь к вашим миграциям
+
+	// Применение миграций
+	err := goose.Up(db, migrationsDir)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *App) startHTTP() {

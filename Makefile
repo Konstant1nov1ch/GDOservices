@@ -12,7 +12,7 @@ clean:
 	rm -rf ./app/build || true
 
 swagger:
-	 swag init -g cmd/app/main.go docs
+	 swag init -g ./cmd/app/main.go ./docs
 
 migrate:
 	$(APP_BIN) migrate -version $(version)
