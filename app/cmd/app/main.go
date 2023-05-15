@@ -4,6 +4,7 @@ import (
 	"GDOservice/internal/app"
 	"GDOservice/internal/config"
 	"GDOservice/pkg/logging"
+	_ "github.com/lib/pq"
 	"log"
 )
 

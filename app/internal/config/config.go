@@ -1,6 +1,8 @@
 package config
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"sync"
 
@@ -23,6 +25,14 @@ type Config struct {
 			Password string `env:"ADMIN_PWD" env-default:"admin"`
 		}
 	}
+	PostgreSQL struct {
+		Username string `env:"PSQL_USERNAME" env-default:"konstantin"`
+		Password string `env:"PSQL_PASSWORD" env-default:"konstantin"`
+		Host     string `env:"PSQL_HOST" env-default:"localhost"`
+		Port     string `env:"PSQL_PORT" env-default:"5432"`
+		Database string `env:"PSQL_DATABASE" env-default:"todo"`
+	}
+	DB *sql.DB // Добавляем поле для хранения соединения с базой данных
 }
 
 var instance *Config
@@ -42,4 +52,20 @@ func GetConfig() *Config {
 		}
 	})
 	return instance
+}
+
+func (c *Config) GetDB() (*sql.DB, error) {
+	cfg := GetConfig()
+	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		cfg.PostgreSQL.Host, cfg.PostgreSQL.Port, cfg.PostgreSQL.Username, cfg.PostgreSQL.Password, cfg.PostgreSQL.Database))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	return db, nil
 }

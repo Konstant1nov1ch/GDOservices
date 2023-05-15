@@ -5,6 +5,7 @@ import (
 	"GDOservice/pkg/logging"
 	"GDOservice/pkg/metric"
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -23,6 +24,7 @@ type App struct {
 	logger     *logging.Logger
 	router     *httprouter.Router
 	httpServer *http.Server
+	db         *sql.DB
 }
 
 func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
@@ -37,14 +39,26 @@ func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
 	metricHandler := metric.Handler{}
 	metricHandler.Register(router)
 
+	db, err := config.GetDB() // Получаем соединение с базой данных из config
+	if err != nil {
+		return App{}, err
+	}
+
 	return App{
 		cfg:    config,
 		logger: logger,
 		router: router,
+		db:     db, // Сохраняем соединение с базой данных в поле приложения
 	}, nil
 }
 
 func (a *App) Run() {
+	a.logger.Info("ping database")
+	err := a.db.Ping()
+	if err != nil {
+		a.logger.Fatal(err)
+	}
+
 	a.startHTTP()
 }
 
