@@ -9,7 +9,7 @@ import (
 
 type Config struct {
 	IsDebug       bool `env:"IS_DEBUG" env-default:"false"`
-	IsDevelopment bool `env:"IS_DEV" env-default:"false"`
+	IsDevelopment bool `env:"IS_DEV" env-default:"true"`
 	Listen        struct {
 		Type       string `env:"LISTEN_TYPE" env-default:"port" env-description:"'port' or 'sock'. if 'sock' then env 'SOCKET_FILE' is required"`
 		BindIP     string `env:"BIND_IP" env-default:"0.0.0.0"`
@@ -35,7 +35,7 @@ func GetConfig() *Config {
 		instance = &Config{}
 
 		if err := cleanenv.ReadEnv(instance); err != nil {
-			helpText := "The Art of Development - Monolith Notes System"
+			helpText := "Monolith Notes System"
 			help, _ := cleanenv.GetDescription(instance, &helpText)
 			log.Print(help)
 			log.Fatal(err)
