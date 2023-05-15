@@ -1,3 +1,4 @@
+-- +migrate Up
 BEGIN;
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -8,12 +9,8 @@ SET search_path = public, extensions;
 SET default_tablespace = '';
 SET default_with_oids = FALSE;
 
---EXTENSION--
-
--- Создание расширения pgcrypto, если оно еще не установлено
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Создание таблицы "user" (пользователь)
 CREATE TABLE public."user"
 (
     id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -21,7 +18,6 @@ CREATE TABLE public."user"
     email          TEXT NOT NULL,
     pwd            TEXT NOT NULL,
     payment_status BOOLEAN DEFAULT false
-    -- Другие поля пользователя
 );
 CREATE TABLE public."category"
 (
@@ -29,19 +25,15 @@ CREATE TABLE public."category"
     name TEXT,
     back_color TEXT,
     word_color TEXT
--- Другие поля категории
 );
 
--- Создание таблицы "table" (рабочее место)
 CREATE TABLE public."table"
 (
     id            SERIAL PRIMARY KEY,
     user_id       UUID REFERENCES public."user" (id),
     capacity      INT DEFAULT 1
-    -- Другие поля рабочего места
 );
 
--- Создание таблицы "note" (заметка)
 CREATE TABLE public."note"
 (
     id            SERIAL PRIMARY KEY,
@@ -50,10 +42,8 @@ CREATE TABLE public."note"
     deadline      TIMESTAMPTZ,
     title         TEXT,
     description   TEXT
-    -- Другие поля заметки
-);
 
---DATA--
+);
 
 INSERT INTO public."category" (name, back_color, word_color)
 VALUES ('работа', '#F14158', '#2F32FA');

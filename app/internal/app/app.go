@@ -9,8 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
-	"github.com/pressly/goose/v3"
 	"github.com/rs/cors"
+	"github.com/rubenv/sql-migrate"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"net"
 	"net/http"
@@ -69,18 +69,22 @@ func (a *App) Run() {
 	a.startHTTP()
 }
 
-// runMigrations ToDo panic: goose: duplicate version 1 detected: Users/konstantin/dev/pets/GDOservice/migrations/00001_init.up.sql
-// /Users/konstantin/dev/pets/GDOservice/migrations/00001_init.down.sql
 func runMigrations(db *sql.DB) error {
-	// Укажите вашу конфигурацию миграций (путь к миграциям и источник данных)
-	goose.SetDialect("postgres") // Замените на вашу используемую базу данных
-	goose.SetTableName("goose_migrations")
 	// Получение пути к текущему файлу
 	_, filename, _, _ := runtime.Caller(0)
 	migrationsDir := filepath.Join(filepath.Dir(filename), "../../../migrations") // Замените на путь к вашим миграциям
 
-	// Применение миграций
-	err := goose.Up(db, migrationsDir)
+	// Создание соединения с базой данных для использования с sql-migrate
+	dbDriver, err := sql.Open("postgres", "host=localhost port=5432 dbname=todo user=konstantin password=konstantin sslmode=disable") // Замените на вашу используемую базу данных и параметры подключения
+	if err != nil {
+		return err
+	}
+
+	// Запуск миграций
+	migrations := &migrate.FileMigrationSource{
+		Dir: migrationsDir,
+	}
+	_, err = migrate.Exec(dbDriver, "postgres", migrations, migrate.Up)
 	if err != nil {
 		return err
 	}
