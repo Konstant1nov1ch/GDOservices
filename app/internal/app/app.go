@@ -2,12 +2,14 @@ package app
 
 import (
 	"GDOservice/internal/config"
+	"GDOservice/pkg/client/postgresql"
 	"GDOservice/pkg/logging"
 	"GDOservice/pkg/metric"
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
 	"github.com/rubenv/sql-migrate"
@@ -26,7 +28,7 @@ type App struct {
 	logger     *logging.Logger
 	router     *httprouter.Router
 	httpServer *http.Server
-	db         *sql.DB
+	pgClient   *pgxpool.Pool
 }
 
 func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
@@ -40,31 +42,36 @@ func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
 	logger.Println("heartbeat metric initializing")
 	metricHandler := metric.Handler{}
 	metricHandler.Register(router)
-
-	db, err := config.GetDB() // Получаем соединение с базой данных из config
+	//Новый способ подключения к бд
+	pgConfig := postgresql.NewPgConfig(
+		config.PostgreSQL.Username, config.PostgreSQL.Password,
+		config.PostgreSQL.Host, config.PostgreSQL.Port, config.PostgreSQL.Database,
+	)
+	pgClient, err := postgresql.NewClient(context.Background(), 5, time.Second*5, pgConfig)
 	if err != nil {
-		return App{}, err
+		logger.Fatal(err)
 	}
-
 	return App{
-		cfg:    config,
-		logger: logger,
-		router: router,
-		db:     db, // Сохраняем соединение с базой данных в поле приложения
+		cfg:      config,
+		logger:   logger,
+		router:   router,
+		pgClient: pgClient, // Сохраняем соединение с базой данных в поле приложения
+
 	}, nil
 }
 
 func (a *App) Run() {
-	a.logger.Info("ping database")
-	err := a.db.Ping()
-	if err != nil {
-		a.logger.Fatal(err)
-	}
+	//a.logger.Info("ping database")
+	//err := a.pgClient.Ping()
+	//if err != nil {
+	//	a.logger.Fatal(err)
+	//}
 	// Запуск миграций
-	err = runMigrations(a.db)
-	if err != nil {
-		a.logger.Fatal(err)
-	}
+	//err = runMigrations(a.pgClient)
+	//a.logger.Info("migrations init")
+	//if err != nil {
+	//	a.logger.Fatal(err)
+	//}
 
 	a.startHTTP()
 }
@@ -72,7 +79,7 @@ func (a *App) Run() {
 func runMigrations(db *sql.DB) error {
 	// Получение пути к текущему файлу
 	_, filename, _, _ := runtime.Caller(0)
-	migrationsDir := filepath.Join(filepath.Dir(filename), "../../../migrations") // Замените на путь к вашим миграциям
+	migrationsDir := filepath.Join(filepath.Dir(filename), "../../../migrations")
 
 	// Создание соединения с базой данных для использования с sql-migrate
 	dbDriver, err := sql.Open("postgres", "host=localhost port=5432 dbname=todo user=konstantin password=konstantin sslmode=disable") // Замените на вашу используемую базу данных и параметры подключения

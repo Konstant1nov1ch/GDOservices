@@ -1,9 +1,0 @@
-database:
-  driver: postgres
-  open: "host=localhost port=5432 dbname=todo user=konstantin password=konstantin sslmode=disable"
-  migrationsDir: ../../../migrations
-  tableName: migrations
-  placeholderFormat: ??
-  useTransaction: true
-  dryRun: false
-  verbose: true
