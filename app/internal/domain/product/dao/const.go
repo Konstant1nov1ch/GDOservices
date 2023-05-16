@@ -1,9 +1,9 @@
 package dao
 
 const (
-	scheme         = "public"
-	table_note     = "note"
-	table_category = "category"
-	table_table    = "table"
-	table_user     = "user"
+	Scheme         = "public"
+	Table_note     = "note"
+	Table_category = "category"
+	Table_table    = "table"
+	Table_user     = "user"
 )

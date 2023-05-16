@@ -1,6 +1,7 @@
-package dao
+package storage
 
 import (
+	"GDOservice/internal/domain/product/dao"
 	"GDOservice/internal/domain/product/table/model"
 	"GDOservice/pkg/client/postgresql"
 	db "GDOservice/pkg/client/postgresql/model"
@@ -11,11 +12,11 @@ import (
 
 type TableStorage struct {
 	queryBuilder sq.StatementBuilderType
-	client       PostgreSQLClient
+	client       dao.PostgreSQLClient
 	logger       *logging.Logger
 }
 
-func NewTableStorage(client PostgreSQLClient, logger *logging.Logger) TableStorage {
+func NewTableStorage(client dao.PostgreSQLClient, logger *logging.Logger) TableStorage {
 	return TableStorage{
 		queryBuilder: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 		client:       client,
@@ -34,11 +35,11 @@ func (s *TableStorage) queryLogger(sql, table string, args []interface{}) *loggi
 func (s *TableStorage) AllTablesByUserID(ctx context.Context, userID int) ([]model.Table, error) {
 	query := s.queryBuilder.Select("id").
 		Column("capacity").
-		From(scheme + "." + table_table).
+		From(dao.Scheme + "." + dao.Table_table).
 		Where(sq.Eq{"user_id": userID})
 
 	sql, args, err := query.ToSql()
-	logger := s.queryLogger(sql, table_table, args)
+	logger := s.queryLogger(sql, dao.Table_table, args)
 	if err != nil {
 		err = db.ErrCreateQuery(err)
 		logger.Error(err)

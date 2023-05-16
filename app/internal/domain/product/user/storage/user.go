@@ -1,6 +1,7 @@
-package dao
+package storage
 
 import (
+	"GDOservice/internal/domain/product/dao"
 	"GDOservice/internal/domain/product/user/model"
 	"GDOservice/pkg/client/postgresql"
 	db "GDOservice/pkg/client/postgresql/model"
@@ -11,11 +12,11 @@ import (
 
 type UserStorage struct {
 	queryBuilder sq.StatementBuilderType
-	client       PostgreSQLClient
+	client       dao.PostgreSQLClient
 	logger       *logging.Logger
 }
 
-func NewUserStorage(client PostgreSQLClient, logger *logging.Logger) UserStorage {
+func NewUserStorage(client dao.PostgreSQLClient, logger *logging.Logger) UserStorage {
 	return UserStorage{
 		queryBuilder: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 		client:       client,
@@ -33,10 +34,10 @@ func (s *UserStorage) queryLogger(sql, table string, args []interface{}) *loggin
 
 func (s *UserStorage) AuthenticateUser(ctx context.Context, email, password string) (*model.User, error) {
 	query := s.queryBuilder.Select("email", "pwd", "name", "id", "payment_status").
-		From(scheme + "." + table_user).
+		From(dao.Scheme + "." + dao.Table_user).
 		Where(sq.Eq{"email": email, "pwd": password})
 	sql, args, err := query.ToSql()
-	logger := s.queryLogger(sql, table_user, args)
+	logger := s.queryLogger(sql, dao.Table_user, args)
 	if err != nil {
 		err = db.ErrCreateQuery(err)
 		logger.Error(err)

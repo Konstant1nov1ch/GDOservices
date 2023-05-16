@@ -1,6 +1,7 @@
-package dao
+package storage
 
 import (
+	"GDOservice/internal/domain/product/dao"
 	"GDOservice/internal/domain/product/note/model"
 	"GDOservice/pkg/client/postgresql"
 	db "GDOservice/pkg/client/postgresql/model"
@@ -11,11 +12,11 @@ import (
 
 type NoteStorage struct {
 	queryBuilder sq.StatementBuilderType
-	client       PostgreSQLClient
+	client       dao.PostgreSQLClient
 	logger       *logging.Logger
 }
 
-func NewNoteStorage(client PostgreSQLClient, logger *logging.Logger) NoteStorage {
+func NewNoteStorage(client dao.PostgreSQLClient, logger *logging.Logger) NoteStorage {
 	return NoteStorage{
 		queryBuilder: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 		client:       client,
@@ -38,11 +39,11 @@ func (s *NoteStorage) GetNotesByTableID(ctx context.Context, tableID int) ([]mod
 		Column("deadline").
 		Column("title").
 		Column("descriptions").
-		From(scheme + "." + table_note).
+		From(dao.Scheme + "." + dao.Table_note).
 		Where(sq.Eq{"table_id": tableID})
 
 	sql, args, err := query.ToSql()
-	logger := s.queryLogger(sql, table_note, args)
+	logger := s.queryLogger(sql, dao.Table_note, args)
 	if err != nil {
 		err = db.ErrCreateQuery(err)
 		logger.Error(err)
