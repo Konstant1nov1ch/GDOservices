@@ -39,7 +39,6 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 		if err != nil {
 			log.Fatalf("Unable to parse config: %v\n", err)
 		}
-		// pgxCfg.ConnConfig.Logger = logrusadapter.NewLogger(logger)
 		pool, err = pgxpool.ConnectConfig(ctx, pgxCfg)
 		if err != nil {
 			log.Println("Failed to connect to postgres... Going to do the next attempt")

@@ -61,22 +61,16 @@ func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
 }
 
 func (a *App) Run() {
-	//a.logger.Info("ping database")
-	//err := a.pgClient.Ping()
-	//if err != nil {
-	//	a.logger.Fatal(err)
-	//}
-	// Запуск миграций
-	//err = runMigrations(a.pgClient)
-	//a.logger.Info("migrations init")
-	//if err != nil {
-	//	a.logger.Fatal(err)
-	//}
+	err := runMigrations()
+	a.logger.Info("migrations init")
+	if err != nil {
+		a.logger.Fatal(err)
+	}
 
 	a.startHTTP()
 }
 
-func runMigrations(db *sql.DB) error {
+func runMigrations() error {
 	// Получение пути к текущему файлу
 	_, filename, _, _ := runtime.Caller(0)
 	migrationsDir := filepath.Join(filepath.Dir(filename), "../../../migrations")

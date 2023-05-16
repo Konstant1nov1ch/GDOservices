@@ -1,12 +1,9 @@
 package logging
 
 import (
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"log"
 	"os"
-	"path"
-	"runtime"
 	"sync"
 )
 
@@ -29,14 +26,6 @@ func GetLogger(level string) Logger {
 		}
 		l := logrus.New()
 		l.SetReportCaller(true)
-		l.Formatter = &logrus.TextFormatter{
-			CallerPrettyfier: func(f *runtime.Frame) (string, string) {
-				filename := path.Base(f.File)
-				return fmt.Sprintf("%s:%d", filename, f.Line), fmt.Sprintf("%s()", f.Function)
-			},
-			DisableColors: false,
-			FullTimestamp: true,
-		}
 		l.SetOutput(os.Stdout)
 		l.SetLevel(logrusLevel)
 		instance = Logger{logrus.NewEntry(l)}

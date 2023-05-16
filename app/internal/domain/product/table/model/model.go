@@ -1,10 +1,7 @@
 package model
 
 type Table struct {
-	Id          string `json:"id         "`
-	TableId     string `json:"table_id   "`
-	CategoryId  string `json:"category_id"`
-	Deadline    string `json:"deadline   "`
-	Title       string `json:"title      "`
-	Description string `json:"description"`
+	Id       string `json:"id"`
+	UserId   string `json:"user_id"`
+	Capacity string `json:"capacity"`
 }
