@@ -1,10 +1,12 @@
 package model
 
+import "github.com/jackc/pgtype"
+
 type Note struct {
-	Id          string `json:"id"`
-	TableId     string `json:"table_id"`
-	CategoryId  string `json:"category_id"`
-	Deadline    string `json:"deadline"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Id          int         `json:"id"`
+	TableId     int         `json:"table_id"`
+	CategoryId  int         `json:"category_id"`
+	Deadline    pgtype.Time `json:"deadline"`
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
 }

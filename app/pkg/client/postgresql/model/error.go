@@ -2,6 +2,30 @@ package model
 
 import "fmt"
 
+type Error struct {
+	Code    ErrorCode
+	Message string
+}
+
+type ErrorCode int
+
+const (
+	CodeNotFound ErrorCode = iota + 1
+	CodeUnauthorized
+	// Add more error codes
+)
+
+func (e *Error) Error() string {
+	return e.Message
+}
+
+func NewError(code ErrorCode, message string) *Error {
+	return &Error{
+		Code:    code,
+		Message: message,
+	}
+}
+
 func ErrCommit(err error) error {
 	return fmt.Errorf("failed to commit Tx due to error: %v", err)
 }
