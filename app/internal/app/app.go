@@ -42,6 +42,7 @@ func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
 	logger.Println("heartbeat metric initializing")
 	metricHandler := metric.Handler{}
 	metricHandler.Register(router)
+
 	//Новый способ подключения к бд
 	pgConfig := postgresql.NewPgConfig(
 		config.PostgreSQL.Username, config.PostgreSQL.Password,
@@ -55,8 +56,7 @@ func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
 		cfg:      config,
 		logger:   logger,
 		router:   router,
-		pgClient: pgClient, // Сохраняем соединение с базой данных в поле приложения
-
+		pgClient: pgClient,
 	}, nil
 }
 
@@ -76,7 +76,7 @@ func runMigrations() error {
 	migrationsDir := filepath.Join(filepath.Dir(filename), "../../../migrations")
 
 	// Создание соединения с базой данных для использования с sql-migrate
-	dbDriver, err := sql.Open("postgres", "host=localhost port=5432 dbname=todo user=konstantin password=konstantin sslmode=disable") // Замените на вашу используемую базу данных и параметры подключения
+	dbDriver, err := sql.Open("postgres", "host=localhost port=5432 dbname=todo user=konstantin password=konstantin sslmode=disable")
 	if err != nil {
 		return err
 	}
@@ -127,8 +127,7 @@ func (a *App) startHTTP() {
 		AllowedHeaders:     []string{"Location", "Charset", "Access-Control-Allow-Origin", "Content-Type", "content-type", "Origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"},
 		OptionsPassthrough: true,
 		ExposedHeaders:     []string{"Location", "Authorization", "Content-Disposition"},
-		// Enable Debugging for testing, consider disabling in production
-		Debug: false,
+		Debug:              true,
 	})
 
 	handler := c.Handler(a.router)
