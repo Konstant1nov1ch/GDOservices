@@ -62,7 +62,7 @@ func (s *TableStorage) AllTablesByUserID(ctx context.Context, userID pgtype.UUID
 	for rows.Next() {
 		t := model.Table{}
 		if err = rows.Scan(
-			&t.Id, &t.UserId, &t.Capacity,
+			&t.Id, &t.Capacity,
 		); err != nil {
 			err = db.ErrScan(postgresql.ParsePgError(err))
 			logger.Error(err)

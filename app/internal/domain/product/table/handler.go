@@ -3,13 +3,13 @@ package handler
 import (
 	"GDOservice/internal/domain/auth/cache"
 	tableStorage "GDOservice/internal/domain/product/table/storage"
-	userModel "GDOservice/internal/domain/product/user/model"
-	userStorage "GDOservice/internal/domain/product/user/storage"
 	"encoding/json"
+	"errors"
+	"github.com/jackc/pgtype"
 	"net/http"
 )
 
-func TablesByUser(userStorage *userStorage.UserStorage, tokenCache *cache.Cache, tblStorage *tableStorage.TableStorage) http.HandlerFunc {
+func TablesByUser(tblStorage *tableStorage.TableStorage, tokenCache *cache.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Получение токена из заголовка Authorization
 		token := r.Header.Get("Authorization")
@@ -24,22 +24,21 @@ func TablesByUser(userStorage *userStorage.UserStorage, tokenCache *cache.Cache,
 			return
 		}
 
-		// Получение пользователя по токену
-		user, err := GetUserFromToken(token, userStorage)
+		// Получение user_id по токену
+		userID, err := GetUserIDFromToken(token, tokenCache)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		// Обновление токена пользователя в кэше
-		err = RefreshUserToken(token, user, tokenCache)
+		userUUID := &pgtype.UUID{}
+		err = userUUID.Set(userID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
 		// Получение таблиц пользователя
-		tables, err := tblStorage.AllTablesByUserID(r.Context(), user.Id)
+		tables, err := tblStorage.AllTablesByUserID(r.Context(), *userUUID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -60,23 +59,16 @@ func IsValidToken(token string, tokenCache *cache.Cache) bool {
 	return tokenCache.Get(token) != nil
 }
 
-func GetUserFromToken(tokenCache *cache.Cache, token string) (*userModel.User, error) {
-	// Получение пароля пользователя из кеша по токену
-	pwd, err := cache.GetPwdFromCache(tokenCache, token)
-	if err != nil {
-		return nil, err
-	}
-	//ToDo фикс срочно
-	user, err := userStorage.GetUserByPassword(pwd)
-	if err != nil {
-		return nil, err
+func GetUserIDFromToken(token string, tokenCache *cache.Cache) (string, error) {
+	userID := tokenCache.Get(token)
+	if userID == nil {
+		return "", errors.New("invalid token")
 	}
 
-	return user, nil
-}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		return "", errors.New("invalid user_id type")
+	}
 
-func RefreshUserToken(token string, user *userModel.User, tokenCache *cache.Cache) error {
-	// Обновление токена пользователя в кэше
-	_, err := cache.RefreshToken(tokenCache, token, user.Id)
-	return err
+	return userIDStr, nil
 }

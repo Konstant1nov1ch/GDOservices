@@ -10,6 +10,7 @@ import (
 	"GDOservice/pkg/logging"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -48,19 +49,21 @@ func TestTablesByUser(t *testing.T) {
 	if err != nil {
 		logger.Println("Failed to create token")
 	}
-	cache.SetTokenInCache(tokenCache, actualToken, password)
+	userSID := fmt.Sprintf("%x-%x-%x-%x-%x", user.Id.Bytes[0:4], user.Id.Bytes[4:6], user.Id.Bytes[6:8], user.Id.Bytes[8:10], user.Id.Bytes[10:16])
+
+	cache.SetTokenInCache(tokenCache, actualToken, userSID)
+
 	// Создание экземпляра хранилища таблиц
 	tableStorage := tableStorage.NewTableStorage(client, &logger)
 
 	// Создание экземпляра хендлера
-	handler := handler.TablesByUser(&userStorage, tokenCache, &tableStorage)
+	handler := handler.TablesByUser(&tableStorage, tokenCache)
 
 	// Создание фейкового HTTP-запроса
 	req, err := http.NewRequest("GET", "/tables", nil)
 	if err != nil {
 		t.Fatalf("Failed to create HTTP request: %v", err)
 	}
-	logger.Println(req)
 
 	// Установка заголовка Authorization с токеном
 	req.Header.Set("Authorization", actualToken)
@@ -95,4 +98,6 @@ func TestTablesByUser(t *testing.T) {
 	if len(actualResponse) != len(expectedResponse) {
 		t.Errorf("Expected %d tables but got %d", len(expectedResponse), len(actualResponse))
 	}
+	logger.Println(actualResponse)
+
 }
