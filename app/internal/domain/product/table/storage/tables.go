@@ -8,6 +8,7 @@ import (
 	"GDOservice/pkg/logging"
 	"context"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgtype"
 )
 
 type TableStorage struct {
@@ -32,7 +33,7 @@ func (s *TableStorage) queryLogger(sql, table string, args []interface{}) *loggi
 	})
 }
 
-func (s *TableStorage) AllTablesByUserID(ctx context.Context, userID int) ([]model.Table, error) {
+func (s *TableStorage) AllTablesByUserID(ctx context.Context, userID pgtype.UUID) ([]model.Table, error) {
 	query := s.queryBuilder.Select("id").
 		Column("capacity").
 		From(dao.Scheme + "." + dao.Table_table).

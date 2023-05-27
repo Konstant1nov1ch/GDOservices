@@ -32,6 +32,14 @@ func GetTokenFromCache(cache *Cache, key string, uuid pgtype.UUID) (string, erro
 	return newToken, nil
 }
 
+func GetPwdFromCache(cache *Cache, key string) (string, error) {
+	token := cache.Get(key)
+	if token != nil {
+		return token.(string), nil
+	}
+	return "", nil
+}
+
 func SetTokenInCache(cache *Cache, key, token string) {
 	cache.Set(key, token)
 }

@@ -2,7 +2,7 @@ package handler
 
 import (
 	"GDOservice/internal/domain/auth/cache"
-	"GDOservice/internal/domain/product/user/storage"
+	userStorage "GDOservice/internal/domain/product/user/storage"
 	db "GDOservice/pkg/client/postgresql/model"
 	"encoding/json"
 	"net/http"
@@ -13,7 +13,7 @@ type AuthRequest struct {
 	Password string `json:"pwd"`
 }
 
-func LoginHandler(userStorage storage.UserStorage, tokenCache *cache.Cache) http.HandlerFunc {
+func LoginHandler(userStorage userStorage.UserStorage, tokenCache *cache.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)
