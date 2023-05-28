@@ -38,7 +38,7 @@ func (s *NoteStorage) GetNotesByTableID(ctx context.Context, tableID int) ([]mod
 		Column("category_id").
 		Column("deadline").
 		Column("title").
-		Column("descriptions").
+		Column("description").
 		From(dao.Scheme + "." + dao.Table_note).
 		Where(sq.Eq{"table_id": tableID})
 
