@@ -57,7 +57,7 @@ func TestNoteTablesByUser(t *testing.T) {
 	tableStorage := *tableStorage.NewPostgreSQLTableStorage(client, &logger)
 
 	// Создание экземпляра хранилища заметок
-	noteStorage := noteStorage.NewNoteStorage(client, &logger)
+	noteStorage := noteStorage.NewPostgreSQLNoteStorage(client, &logger)
 
 	// Создание экземпляра хендлера
 	handler := handler.TablesByUser(&tableStorage, tokenCache)

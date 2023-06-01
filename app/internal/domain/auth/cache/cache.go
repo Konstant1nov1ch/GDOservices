@@ -2,7 +2,6 @@ package cache
 
 import (
 	"container/list"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -10,7 +9,6 @@ import (
 type Cache interface {
 	Get(key string) interface{}
 	Set(key string, value string)
-	Print()
 }
 
 type cacheItem struct {
@@ -70,12 +68,12 @@ func (c *LRU) Set(key string, value string) {
 	c.addToL1(item)
 }
 
-func (c *LRU) Print() {
-	fmt.Println("Cache Contents:")
-	for key, item := range c.L1 {
-		fmt.Printf("Key: %s, Value: %v\n", key, item.Value.(*cacheItem).Value)
-	}
-}
+//func (c *LRU) Print() {
+//	fmt.Println("Cache Contents:")
+//	for key, item := range c.L1 {
+//		fmt.Printf("Key: %s, Value: %v\n", key, item.Value.(*cacheItem).Value)
+//	}
+//}
 
 func (c *LRU) promoteL1(item *list.Element) {
 	item.Value.(*cacheItem).AccessCnt++

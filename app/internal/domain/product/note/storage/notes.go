@@ -10,21 +10,26 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-type NoteStorage struct {
+type NoteStorage interface {
+	GetNotesByTableID(ctx context.Context, tableID int) ([]model.Note, error)
+	// ToDo Другие методы для работы с table
+}
+
+type PostgreSQLNoteStorage struct {
 	queryBuilder sq.StatementBuilderType
 	client       dao.PostgreSQLClient
 	logger       *logging.Logger
 }
 
-func NewNoteStorage(client dao.PostgreSQLClient, logger *logging.Logger) NoteStorage {
-	return NoteStorage{
+func NewPostgreSQLNoteStorage(client dao.PostgreSQLClient, logger *logging.Logger) *PostgreSQLNoteStorage {
+	return &PostgreSQLNoteStorage{
 		queryBuilder: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 		client:       client,
 		logger:       logger,
 	}
 }
 
-func (s *NoteStorage) queryLogger(sql, table string, args []interface{}) *logging.Logger {
+func (s *PostgreSQLNoteStorage) queryLogger(sql, table string, args []interface{}) *logging.Logger {
 	return s.logger.ExtraFields(map[string]interface{}{
 		"sql":   sql,
 		"table": table,
@@ -32,7 +37,7 @@ func (s *NoteStorage) queryLogger(sql, table string, args []interface{}) *loggin
 	})
 }
 
-func (s *NoteStorage) GetNotesByTableID(ctx context.Context, tableID int) ([]model.Note, error) {
+func (s *PostgreSQLNoteStorage) GetNotesByTableID(ctx context.Context, tableID int) ([]model.Note, error) {
 	query := s.queryBuilder.Select("id").
 		Column("table_id").
 		Column("category_id").
