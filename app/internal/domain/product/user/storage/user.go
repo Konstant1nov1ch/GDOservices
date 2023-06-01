@@ -10,21 +10,26 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-type UserStorage struct {
+type UserStorage interface {
+	AuthenticateUser(ctx context.Context, email, password string) (*model.User, error)
+	// ToDo Другие методы для работы с пользователями
+}
+
+type PostgreSQLUserStorage struct {
 	queryBuilder sq.StatementBuilderType
 	client       dao.PostgreSQLClient
 	logger       *logging.Logger
 }
 
-func NewUserStorage(client dao.PostgreSQLClient, logger *logging.Logger) UserStorage {
-	return UserStorage{
+func NewPostgreSQLUserStorage(client dao.PostgreSQLClient, logger *logging.Logger) *PostgreSQLUserStorage {
+	return &PostgreSQLUserStorage{
 		queryBuilder: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 		client:       client,
 		logger:       logger,
 	}
 }
 
-func (s *UserStorage) queryLogger(sql, table string, args []interface{}) *logging.Logger {
+func (s *PostgreSQLUserStorage) queryLogger(sql string, table string, args []interface{}) *logging.Logger {
 	return s.logger.ExtraFields(map[string]interface{}{
 		"sql":   sql,
 		"table": table,
@@ -32,7 +37,8 @@ func (s *UserStorage) queryLogger(sql, table string, args []interface{}) *loggin
 	})
 }
 
-func (s *UserStorage) AuthenticateUser(ctx context.Context, email, password string) (*model.User, error) {
+// ToDo добавить хэш
+func (s *PostgreSQLUserStorage) AuthenticateUser(ctx context.Context, email, password string) (*model.User, error) {
 	query := s.queryBuilder.Select("email", "pwd", "name", "id", "payment_status").
 		From(dao.Scheme + "." + dao.Table_user).
 		Where(sq.Eq{"email": email, "pwd": password})

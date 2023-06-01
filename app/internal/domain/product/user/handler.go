@@ -13,7 +13,8 @@ type AuthRequest struct {
 	Password string `json:"pwd"`
 }
 
-func LoginHandler(userStorage userStorage.UserStorage, tokenCache *cache.Cache) http.HandlerFunc {
+// ToDo добавть хэш
+func LoginHandler(userStorage userStorage.UserStorage, tokenCache cache.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)

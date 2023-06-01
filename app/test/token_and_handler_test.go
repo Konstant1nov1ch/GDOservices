@@ -31,7 +31,7 @@ func TestLoginHandler(t *testing.T) {
 	defer client.Close()
 
 	logger := logging.GetLogger("info")
-	storage := storage.NewUserStorage(client, &logger)
+	storage := storage.NewPostgreSQLUserStorage(client, &logger)
 
 	email := "1234"
 	password := "1234"

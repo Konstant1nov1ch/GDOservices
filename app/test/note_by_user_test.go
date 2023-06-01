@@ -33,7 +33,7 @@ func TestNoteTablesByUser(t *testing.T) {
 	defer client.Close()
 
 	logger := logging.GetLogger("info")
-	userStorage := userStorage.NewUserStorage(client, &logger)
+	userStorage := userStorage.NewPostgreSQLUserStorage(client, &logger)
 
 	tokenCache, err := cache.NewCache(10, 30*time.Second)
 	if err != nil {
@@ -54,7 +54,7 @@ func TestNoteTablesByUser(t *testing.T) {
 	cache.SetTokenInCache(tokenCache, actualToken, userSID)
 
 	// Создание экземпляра хранилища таблиц
-	tableStorage := tableStorage.NewTableStorage(client, &logger)
+	tableStorage := *tableStorage.NewPostgreSQLTableStorage(client, &logger)
 
 	// Создание экземпляра хранилища заметок
 	noteStorage := noteStorage.NewNoteStorage(client, &logger)

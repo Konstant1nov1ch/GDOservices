@@ -11,21 +11,26 @@ import (
 	"github.com/jackc/pgtype"
 )
 
-type TableStorage struct {
+type TableStorage interface {
+	AllTablesByUserID(ctx context.Context, userID pgtype.UUID) ([]model.Table, error)
+	// ToDo Другие методы для работы с table
+}
+
+type PostgreSQLTableStorage struct {
 	queryBuilder sq.StatementBuilderType
 	client       dao.PostgreSQLClient
 	logger       *logging.Logger
 }
 
-func NewTableStorage(client dao.PostgreSQLClient, logger *logging.Logger) TableStorage {
-	return TableStorage{
+func NewPostgreSQLTableStorage(client dao.PostgreSQLClient, logger *logging.Logger) *PostgreSQLTableStorage {
+	return &PostgreSQLTableStorage{
 		queryBuilder: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 		client:       client,
 		logger:       logger,
 	}
 }
 
-func (s *TableStorage) queryLogger(sql, table string, args []interface{}) *logging.Logger {
+func (s *PostgreSQLTableStorage) queryLogger(sql, table string, args []interface{}) *logging.Logger {
 	return s.logger.ExtraFields(map[string]interface{}{
 		"sql":   sql,
 		"table": table,
@@ -33,7 +38,7 @@ func (s *TableStorage) queryLogger(sql, table string, args []interface{}) *loggi
 	})
 }
 
-func (s *TableStorage) AllTablesByUserID(ctx context.Context, userID pgtype.UUID) ([]model.Table, error) {
+func (s *PostgreSQLTableStorage) AllTablesByUserID(ctx context.Context, userID pgtype.UUID) ([]model.Table, error) {
 	query := s.queryBuilder.Select("id").
 		Column("capacity").
 		From(dao.Scheme + "." + dao.Table_table).

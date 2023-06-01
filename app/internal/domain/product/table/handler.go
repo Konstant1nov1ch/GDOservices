@@ -1,15 +1,15 @@
 package handler
 
 import (
+	"GDOservice/internal/domain/auth"
 	"GDOservice/internal/domain/auth/cache"
 	tableStorage "GDOservice/internal/domain/product/table/storage"
 	"encoding/json"
-	"errors"
 	"github.com/jackc/pgtype"
 	"net/http"
 )
 
-func TablesByUser(tblStorage *tableStorage.TableStorage, tokenCache *cache.Cache) http.HandlerFunc {
+func TablesByUser(tblStorage tableStorage.TableStorage, tokenCache cache.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Получение токена из заголовка Authorization
 		token := r.Header.Get("Authorization")
@@ -19,15 +19,15 @@ func TablesByUser(tblStorage *tableStorage.TableStorage, tokenCache *cache.Cache
 		}
 
 		// Проверка токена на валидность
-		if !IsValidToken(token, tokenCache) {
+		if !auth.IsValidToken(token, tokenCache) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		// Получение user_id по токену
-		userID, err := GetUserIDFromToken(token, tokenCache)
+		// Извлечение user_id из токена
+		userID, err := auth.GetUserIDFromToken(token, tokenCache)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
@@ -52,23 +52,4 @@ func TablesByUser(tblStorage *tableStorage.TableStorage, tokenCache *cache.Cache
 			return
 		}
 	}
-}
-
-func IsValidToken(token string, tokenCache *cache.Cache) bool {
-	// Проверка токена на валидность, например, в кеше или базе данных
-	return tokenCache.Get(token) != nil
-}
-
-func GetUserIDFromToken(token string, tokenCache *cache.Cache) (string, error) {
-	userID := tokenCache.Get(token)
-	if userID == nil {
-		return "", errors.New("invalid token")
-	}
-
-	userIDStr, ok := userID.(string)
-	if !ok {
-		return "", errors.New("invalid user_id type")
-	}
-
-	return userIDStr, nil
 }

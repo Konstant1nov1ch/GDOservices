@@ -18,7 +18,7 @@ func GenerateToken(uuid pgtype.UUID) (string, error) {
 	return token, nil
 }
 
-func GetTokenFromCache(cache *Cache, key string, uuid pgtype.UUID) (string, error) {
+func GetTokenFromCache(cache Cache, key string, uuid pgtype.UUID) (string, error) {
 	token := cache.Get(key)
 	if token != nil {
 		return token.(string), nil
@@ -32,7 +32,7 @@ func GetTokenFromCache(cache *Cache, key string, uuid pgtype.UUID) (string, erro
 	return newToken, nil
 }
 
-func SetTokenInCache(cache *Cache, key, token string) {
+func SetTokenInCache(cache Cache, key, token string) {
 	cache.Set(key, token)
 }
 
@@ -41,7 +41,7 @@ func IsTokenExpired(creationTime time.Time) bool {
 	return time.Now().After(expirationTime)
 }
 
-func RefreshToken(cache *Cache, key string, uuid pgtype.UUID) (string, error) {
+func RefreshToken(cache Cache, key string, uuid pgtype.UUID) (string, error) {
 	newToken, err := GenerateToken(uuid)
 	if err != nil {
 		return "", err

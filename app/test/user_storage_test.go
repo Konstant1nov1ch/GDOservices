@@ -1,4 +1,4 @@
-package storage_test
+package storage
 
 import (
 	"GDOservice/internal/domain/product/user/storage"
@@ -24,7 +24,7 @@ func TestAuthenticateUser(t *testing.T) {
 	defer client.Close()
 
 	logger := logging.GetLogger("info")
-	storage := storage.NewUserStorage(client, &logger)
+	storage := storage.NewPostgreSQLUserStorage(client, &logger)
 
 	email := "1234"
 	password := "1234"
