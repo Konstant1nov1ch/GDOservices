@@ -1,15 +1,14 @@
 package storage
 
 import (
+	handlerStorage "GDOservice/internal/domain/product/note"
+	"GDOservice/internal/domain/product/note/model"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	handlerStorage "GDOservice/internal/domain/product/note"
-	"GDOservice/internal/domain/product/note/model"
 
 	"github.com/stretchr/testify/assert"
 )

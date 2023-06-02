@@ -5,7 +5,6 @@ import (
 	"GDOservice/internal/domain/auth/cache"
 	"GDOservice/internal/domain/product/note/storage"
 	"encoding/json"
-	"github.com/jackc/pgtype"
 	"net/http"
 	"strconv"
 )
@@ -25,13 +24,6 @@ func NotesByTableID(noteStorage storage.NoteStorage, tokenCache cache.Cache) htt
 			return
 		}
 
-		// Извлечение user_id из токена
-		userID, err := auth.GetUserIDFromToken(token, tokenCache)
-		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
 		// Получение table_id из параметров запроса
 		tableID := r.URL.Query().Get("table_id")
 		if tableID == "" {
@@ -43,13 +35,6 @@ func NotesByTableID(noteStorage storage.NoteStorage, tokenCache cache.Cache) htt
 		tableIDInt, err := strconv.Atoi(tableID)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		userUUID := &pgtype.UUID{}
-		err = userUUID.Set(userID)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
